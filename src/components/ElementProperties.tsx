@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import type { ElementBox } from '../types/appium';
 import { getElementDisplayName } from '../utils/xmlParser';
 

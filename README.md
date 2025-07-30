@@ -1,69 +1,68 @@
-# React + TypeScript + Vite
+# Appium Inspector
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Современная альтернатива официальному Appium Inspector с улучшенным интерфейсом и дополнительными возможностями.
 
-Currently, two official plugins are available:
+## 🚀 Возможности
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- ✅ **Управление сессиями**: Подключение к активным Appium сессиям
+- ✅ **Настраиваемая глубина**: Выбор `snapshotMaxDepth` для дерева элементов  
+- ✅ **Интерактивное дерево**: Навигация по UI элементам
+- ✅ **Скриншот + наложение**: Визуализация элементов на скриншоте устройства
+- ✅ **Клик-селект**: Выбор элементов кликом по canvas
+- ✅ **Генерация селекторов**: Автоматическое создание локаторов
+- ✅ **Примеры кода**: Python и Java код для найденных элементов
+- ✅ **Копирование в буфер**: Быстрое копирование селекторов
 
-## Expanding the ESLint configuration
+## 📋 Требования
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Appium Server** запущен на `localhost:4723`
+- **macOS** (Intel или Apple Silicon)
+- Активная Appium сессия для инспекции
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🔧 API Подключение
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Development режим
+```bash
+pnpm dev
+# API: http://localhost:5173 → proxy → http://localhost:4723
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Electron приложение  
+```bash
+# API: прямое подключение к http://localhost:4723
+open "release/mac/Appium Inspector.app"
 ```
+
+### ⚠️ Важно для Electron
+- Убедитесь что **Appium Server запущен** на порту 4723
+- Проверьте что нет блокировки CORS
+- При проблемах с подключением проверьте Developer Tools в приложении
+
+## 🛠️ Разработка
+
+```bash
+# Установка зависимостей
+pnpm install
+
+# Запуск в development режиме
+pnpm dev
+
+# Запуск Electron с hot reload
+pnpm electron:dev
+
+# Сборка production версии
+pnpm electron:build
+```
+
+## 🏗️ Архитектура
+
+- **Frontend**: React 18 + TypeScript + Tailwind CSS v4
+- **Desktop**: Electron 37 + electron-builder
+- **Build**: Vite 5 + TypeScript
+- **API**: Прямое подключение к Appium REST API
+
+## 📱 Поддерживаемые платформы
+
+- **iOS**: XCUITest элементы
+- **Android**: UIAutomator2 элементы  
+- **Универсальные**: Accessibility ID, XPath селекторы

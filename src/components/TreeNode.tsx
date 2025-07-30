@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import type { ElementBox } from '../types/appium';
 import { getElementIcon, getElementColor, getElementDisplayName } from '../utils/xmlParser';
 

@@ -1,7 +1,24 @@
 import type { AppiumSession, AppiumSettings, SessionsResponse, PageSourceResponse } from '../types/appium';
 
 class AppiumService {
-  private baseUrl = '/api/appium';
+  private baseUrl: string;
+
+  constructor() {
+    // В Electron приложении используем прямой адрес, в dev режиме - прокси
+    const isElectron = typeof window !== 'undefined' && 'electronAPI' in window;
+    const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost' && window.location.port === '5173';
+    
+    if (isElectron) {
+      this.baseUrl = 'http://localhost:4723';
+    } else if (isDev) {
+      this.baseUrl = '/api/appium';
+    } else {
+      // Fallback для других случаев
+      this.baseUrl = 'http://localhost:4723';
+    }
+    
+    console.log('AppiumService initialized with baseUrl:', this.baseUrl);
+  }
 
   /**
    * Получить список активных сессий

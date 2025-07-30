@@ -12,12 +12,6 @@ export default function App() {
   const [maxDepth, setMaxDepth] = useState<number>(20);
   const [highlightedElement, setHighlightedElement] = useState<ElementBox | null>(null);
   const [screenshotImage, setScreenshotImage] = useState<HTMLImageElement | null>(null);
-  const [debugInfo, setDebugInfo] = useState<{
-    screenshotSize?: { width: number; height: number };
-    canvasSize?: { width: number; height: number };
-    scaleFactors?: { scaleX: number; scaleY: number };
-    elementCount?: number;
-  }>({});
   
   const {
     sessions,
@@ -86,21 +80,21 @@ export default function App() {
           canvas.style.height = `${canvasHeight}px`;
           
           // Update debug info
-          setDebugInfo(prev => ({
-            ...prev,
-            screenshotSize: { width: img.width, height: img.height },
-            canvasSize: { width: canvasWidth, height: canvasHeight },
-            scaleFactors: { 
-              scaleX: canvasWidth / img.width, 
-              scaleY: canvasHeight / img.height 
-            }
-          }));
+          // setDebugInfo(prev => ({
+          //   ...prev,
+          //   screenshotSize: { width: img.width, height: img.height },
+          //   canvasSize: { width: canvasWidth, height: canvasHeight },
+          //   scaleFactors: { 
+          //     scaleX: canvasWidth / img.width, 
+          //     scaleY: canvasHeight / img.height 
+          //   }
+          // }));
         }
       };
       img.onerror = () => {
         console.error('Failed to load screenshot image');
         setScreenshotImage(null);
-        setDebugInfo({});
+        // setDebugInfo({});
       };
       img.src = `data:image/png;base64,${screenshot}`;
     } else {
@@ -113,18 +107,18 @@ export default function App() {
         canvas.style.width = '402px';
         canvas.style.height = '874px';
       }
-      setDebugInfo({});
+      // setDebugInfo({});
     }
   }, [screenshot]);
 
   // Update element count in debug info
   useEffect(() => {
     if (rootBox) {
-      const elementCount = flatten(rootBox).length;
-      setDebugInfo(prev => ({
-        ...prev,
-        elementCount
-      }));
+      // const elementCount = flatten(rootBox).length;
+      // setDebugInfo(prev => ({
+      //   ...prev,
+      //   elementCount
+      // }));
     }
   }, [rootBox]);
 
@@ -398,14 +392,14 @@ export default function App() {
       console.log('Selected deepest element:', deepestElement);
       
       // Scroll to element in tree (we'll implement this next)
-      scrollToElementInTree(deepestElement);
+      scrollToElementInTree();
     } else {
       console.log('No elements found at click position');
     }
   };
 
   // Function to scroll to element in tree
-  const scrollToElementInTree = (element: ElementBox) => {
+  const scrollToElementInTree = () => {
     // Find the DOM element in the tree by its coordinates (simple approach)
     // We'll use a timeout to let React re-render the highlighted element first
     setTimeout(() => {
@@ -422,7 +416,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-4">
+    <div className="min-h-screen bg-gray-50 pt-16">
       <div className="max-w-full mx-auto space-y-4 px-4">
         {/* Session Selection Panel */}
         <div className="session-panel rounded-lg p-4 text-white shadow-lg">

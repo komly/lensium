@@ -1,0 +1,7 @@
+{
+  "watch": ["electron/"],
+  "ignore": ["node_modules/", "dist/", "release/", "src/"],
+  "exec": "electron electron/main.cjs",
+  "ext": "js,cjs,json",
+  "delay": "1000"
+} 
