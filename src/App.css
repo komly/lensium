@@ -1,0 +1,46 @@
+/* Custom components that extend Tailwind */
+
+.session-panel {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.session-select:focus,
+.depth-input:focus {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.session-select option {
+  background: #333;
+  color: white;
+}
+
+.element-tree ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.element-tree ul ul {
+  padding-left: 20px;
+  border-left: 1px solid #e5e7eb;
+  margin-left: 8px;
+}
+
+.element-tree li {
+  margin: 2px 0;
+  padding: 2px 0;
+}
+
+/* Logo animation */
+.appium-logo {
+  animation: spin 20s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
