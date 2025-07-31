@@ -1,7 +1,7 @@
 {
   "name": "lensium",
   "private": true,
-  "version": "1.0.5",
+  "version": "1.0.6",
   "type": "module",
   "description": "Modern desktop application for inspecting mobile app UI elements",
   "author": "Your Name",
