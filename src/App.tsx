@@ -1,18 +1,19 @@
 // src/App.tsx
 import React, { useEffect, useRef, useState } from 'react';
-import { useAppium } from './hooks/useAppium';
-import { TreeNode } from './components/TreeNode';
-import { ElementProperties } from './components/ElementProperties';
-import { flatten, getElementDisplayName } from './utils/xmlParser';
-import type { ElementBox } from './types/appium';
 import './App.css';
+import { ElementProperties } from './components/ElementProperties';
+import { TreeNode } from './components/TreeNode';
+import { useAppium } from './hooks/useAppium';
+import type { ElementBox } from './types/appium';
+import { flatten, getElementDisplayName } from './utils/xmlParser';
 
 export default function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [maxDepth, setMaxDepth] = useState<number>(20);
+  const [optimizePageSource, setOptimizePageSource] = useState<boolean>(true);
   const [highlightedElement, setHighlightedElement] = useState<ElementBox | null>(null);
   const [screenshotImage, setScreenshotImage] = useState<HTMLImageElement | null>(null);
-  
+
   const {
     sessions,
     selectedSession,
@@ -30,12 +31,12 @@ export default function App() {
 
   const handleConnectToSession = () => {
     if (selectedSession) {
-      connectToSession(selectedSession, maxDepth);
+      connectToSession(selectedSession, maxDepth, optimizePageSource);
     }
   };
 
   const handleRefreshPageSource = () => {
-    refreshPageSource(maxDepth);
+    refreshPageSource(maxDepth, optimizePageSource);
   };
 
   const handleRefreshScreenshot = () => {
@@ -53,32 +54,32 @@ export default function App() {
       const img = new Image();
       img.onload = () => {
         setScreenshotImage(img);
-        
+
         // Adjust canvas size to match screenshot dimensions
         const canvas = canvasRef.current;
         if (canvas) {
           // Keep aspect ratio but limit max size
           const maxWidth = 500;
           const maxHeight = 900;
-          
+
           let canvasWidth = img.width;
           let canvasHeight = img.height;
-          
+
           // Scale down if image is too large
           if (canvasWidth > maxWidth || canvasHeight > maxHeight) {
             const scaleX = maxWidth / canvasWidth;
             const scaleY = maxHeight / canvasHeight;
             const scale = Math.min(scaleX, scaleY);
-            
+
             canvasWidth = Math.round(canvasWidth * scale);
             canvasHeight = Math.round(canvasHeight * scale);
           }
-          
+
           canvas.width = canvasWidth;
           canvas.height = canvasHeight;
           canvas.style.width = `${canvasWidth}px`;
           canvas.style.height = `${canvasHeight}px`;
-          
+
           // Update debug info
           // setDebugInfo(prev => ({
           //   ...prev,
@@ -131,25 +132,25 @@ export default function App() {
 
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
     // Set canvas background
     ctx.fillStyle = '#f9fafb';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
+
     // Draw screenshot if available
     if (screenshotImage) {
       // Draw screenshot to fill the entire canvas
       ctx.drawImage(screenshotImage, 0, 0, canvas.width, canvas.height);
-      
+
       // Draw element overlays if we have element tree
       if (rootBox) {
         const allBoxes = flatten(rootBox);
-        
+
         // Try to get device size from multiple sources
         let deviceWidth = canvas.width;
         let deviceHeight = canvas.height;
         let sizeSource = 'canvas fallback';
-        
+
         if (deviceInfo?.windowSize?.width) {
           deviceWidth = deviceInfo.windowSize.width;
           deviceHeight = deviceInfo.windowSize.height;
@@ -180,14 +181,14 @@ export default function App() {
             sizeSource = 'iOS generic size';
           }
         }
-        
+
         // Calculate device pixel ratio using detected device size
         const devicePixelRatio = screenshotImage.width / deviceWidth;
-        
+
         // Scale factors based on canvas vs device logical screen size
         const scaleX = canvas.width / deviceWidth;
         const scaleY = canvas.height / deviceHeight;
-        
+
         // Debug: log first few elements
         console.log('=== DEBUG INFO ===');
         console.log('Screenshot size (physical):', screenshotImage.width, 'x', screenshotImage.height);
@@ -195,28 +196,28 @@ export default function App() {
         console.log('Device size source:', sizeSource);
         console.log('Device window size (logical):', deviceWidth, 'x', deviceHeight);
         console.log('Device pixel ratio (calculated):', devicePixelRatio.toFixed(2));
-        console.log('Scale factors (canvas/device):', { 
-          scaleX: scaleX.toFixed(3), 
-          scaleY: scaleY.toFixed(3) 
+        console.log('Scale factors (canvas/device):', {
+          scaleX: scaleX.toFixed(3),
+          scaleY: scaleY.toFixed(3)
         });
         console.log('Total elements:', allBoxes.length);
         console.log('Device info object:', deviceInfo);
-        
+
         // Show first 3 elements for debugging
         allBoxes.slice(0, 3).forEach((box, i) => {
           console.log(`Element ${i}:`, {
             original: { x: box.x, y: box.y, width: box.width, height: box.height },
-            scaled: { 
-              x: (box.x * scaleX).toFixed(1), 
-              y: (box.y * scaleY).toFixed(1), 
-              width: (box.width * scaleX).toFixed(1), 
+            scaled: {
+              x: (box.x * scaleX).toFixed(1),
+              y: (box.y * scaleY).toFixed(1),
+              width: (box.width * scaleX).toFixed(1),
               height: (box.height * scaleY).toFixed(1)
             },
             name: box.name,
             type: box.type
           });
         });
-        
+
         for (const box of allBoxes) {
           if (box.width > 0 && box.height > 0) {
             // Scale element coordinates using device logical screen dimensions
@@ -224,16 +225,16 @@ export default function App() {
             const elementY = box.y * scaleY;
             const elementWidth = box.width * scaleX;
             const elementHeight = box.height * scaleY;
-            
+
             // Skip very small elements
             if (elementWidth < 2 || elementHeight < 2) continue;
-            
+
             // Highlight selected element
             if (highlightedElement && box === highlightedElement) {
               ctx.strokeStyle = '#ef4444';
               ctx.lineWidth = 2;
               ctx.setLineDash([3, 3]);
-              
+
               // Add semi-transparent overlay for highlighted element
               ctx.fillStyle = 'rgba(239, 68, 68, 0.25)';
               ctx.fillRect(elementX, elementY, elementWidth, elementHeight);
@@ -242,24 +243,24 @@ export default function App() {
               ctx.lineWidth = 1;
               ctx.setLineDash([]);
             }
-            
+
             ctx.strokeRect(elementX, elementY, elementWidth, elementHeight);
-            
+
             // Draw element name if space allows and element is highlighted
             if (highlightedElement === box && box.name && elementWidth > 40 && elementHeight > 20) {
               ctx.fillStyle = '#ef4444';
               ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
               const text = box.name.length > 25 ? box.name.substring(0, 25) + '...' : box.name;
-              
+
               // Add background for text
               const textMetrics = ctx.measureText(text);
               const textWidth = textMetrics.width + 6;
               const textHeight = 16;
-              
+
               // Position text above element if there's space, otherwise inside
               let textX = elementX + 2;
               let textY = elementY > textHeight ? elementY - 2 : elementY + 14;
-              
+
               // Ensure text doesn't go outside canvas
               if (textX + textWidth > canvas.width) {
                 textX = canvas.width - textWidth - 2;
@@ -267,30 +268,30 @@ export default function App() {
               if (textY < 14) {
                 textY = elementY + 14;
               }
-              
+
               ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
               ctx.fillRect(textX - 1, textY - 12, textWidth, textHeight);
-              
+
               // Add border to text background
               ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)';
-    ctx.lineWidth = 1;
+              ctx.lineWidth = 1;
               ctx.setLineDash([]);
               ctx.strokeRect(textX - 1, textY - 12, textWidth, textHeight);
-              
+
               ctx.fillStyle = '#ef4444';
               ctx.fillText(text, textX + 2, textY - 2);
             }
           }
         }
-        
+
         // Reset line dash
         ctx.setLineDash([]);
       }
     } else if (rootBox) {
       // Fallback: draw elements without screenshot
       const allBoxes = flatten(rootBox);
-      
-    for (const box of allBoxes) {
+
+      for (const box of allBoxes) {
         if (box.width > 0 && box.height > 0) {
           // Highlight selected element
           if (highlightedElement && box === highlightedElement) {
@@ -302,9 +303,9 @@ export default function App() {
             ctx.lineWidth = 1;
             ctx.setLineDash([]);
           }
-          
-      ctx.strokeRect(box.x, box.y, box.width, box.height);
-          
+
+          ctx.strokeRect(box.x, box.y, box.width, box.height);
+
           // Draw element name if space allows
           if (box.name && box.width > 30 && box.height > 20) {
             ctx.fillStyle = highlightedElement === box ? '#ef4444' : '#6b7280';
@@ -320,7 +321,7 @@ export default function App() {
   const handleElementClick = (element: ElementBox) => {
     setHighlightedElement(element);
     console.log('Selected element:', element);
-    
+
     // Scroll properties panel to top when new element is selected
     setTimeout(() => {
       const propertiesPanel = document.getElementById('element-properties-scroll');
@@ -336,18 +337,18 @@ export default function App() {
   // Handle canvas click to select element
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     if (!rootBox || !screenshotImage) return;
-    
+
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     const rect = canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
-    
+
     // Get device size using same logic as in drawing
     let deviceWidth = canvas.width;
     let deviceHeight = canvas.height;
-    
+
     if (deviceInfo?.windowSize?.width) {
       deviceWidth = deviceInfo.windowSize.width;
       deviceHeight = deviceInfo.windowSize.height;
@@ -358,39 +359,39 @@ export default function App() {
       deviceWidth = 402;
       deviceHeight = 874;
     }
-    
+
     // Convert canvas coordinates back to device coordinates
     const scaleX = canvas.width / deviceWidth;
     const scaleY = canvas.height / deviceHeight;
-    
+
     const deviceX = x / scaleX;
     const deviceY = y / scaleY;
-    
+
     console.log('Click coordinates:', {
       canvas: { x, y },
       device: { x: deviceX.toFixed(1), y: deviceY.toFixed(1) },
       scale: { scaleX: scaleX.toFixed(3), scaleY: scaleY.toFixed(3) }
     });
-    
+
     // Find all elements that contain the click point
     const allBoxes = flatten(rootBox);
-    const clickedElements = allBoxes.filter(box => 
-      deviceX >= box.x && 
+    const clickedElements = allBoxes.filter(box =>
+      deviceX >= box.x &&
       deviceX <= box.x + box.width &&
-      deviceY >= box.y && 
+      deviceY >= box.y &&
       deviceY <= box.y + box.height &&
-      box.width > 0 && 
+      box.width > 0 &&
       box.height > 0
     );
-    
+
     if (clickedElements.length > 0) {
       // Select the deepest (most specific) element - usually the last one
       const deepestElement = clickedElements[clickedElements.length - 1];
       setHighlightedElement(deepestElement);
-      
+
       console.log('Found elements at click:', clickedElements.length);
       console.log('Selected deepest element:', deepestElement);
-      
+
       // Scroll to element in tree (we'll implement this next)
       scrollToElementInTree();
     } else {
@@ -405,7 +406,7 @@ export default function App() {
     setTimeout(() => {
       const treeContainer = document.querySelector('.element-tree');
       const highlightedNode = document.querySelector('.bg-red-100');
-      
+
       if (treeContainer && highlightedNode) {
         highlightedNode.scrollIntoView({
           behavior: 'smooth',
@@ -423,14 +424,14 @@ export default function App() {
           <h2 className="text-lg font-semibold mb-3">
             Подключение к Appium сессии
           </h2>
-          
+
           <div className="flex flex-wrap gap-4 items-end">
             <div className="flex-1 min-w-[250px]">
               <label className="block text-sm font-medium mb-2 opacity-90">
                 Активные сессии:
               </label>
-              <select 
-                value={selectedSession} 
+              <select
+                value={selectedSession}
                 onChange={(e) => setSelectedSession(e.target.value)}
                 className="session-select w-full px-3 py-2 border-2 border-white/20 rounded-lg bg-white/10 text-white text-sm transition-all duration-200 focus:outline-none focus:border-white/50"
                 disabled={isLoading}
@@ -438,13 +439,13 @@ export default function App() {
                 <option value="">Выберите сессию</option>
                 {sessions.map((session) => (
                   <option key={session.id} value={session.id}>
-                    {session.id.substring(0, 8)}... - {session.capabilities.platformName || 'Unknown'} 
+                    {session.id.substring(0, 8)}... - {session.capabilities.platformName || 'Unknown'}
                     {session.capabilities.deviceName && ` (${session.capabilities.deviceName})`}
                   </option>
                 ))}
               </select>
             </div>
-            
+
             <div className="flex flex-col">
               <label className="block text-sm font-medium mb-2 opacity-90">
                 Глубина дерева:
@@ -458,7 +459,22 @@ export default function App() {
                 className="depth-input w-20 px-3 py-2 border-2 border-white/20 rounded-lg bg-white/10 text-white text-sm transition-all duration-200 focus:outline-none focus:border-white/50"
               />
             </div>
-            
+
+            <div className="flex flex-col">
+              <label className="flex items-center space-x-2 text-sm font-medium opacity-90 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={optimizePageSource}
+                  onChange={(e) => setOptimizePageSource(e.target.checked)}
+                  className="w-4 h-4 text-indigo-600 bg-white/10 border-white/20 rounded focus:ring-indigo-500 focus:ring-2"
+                />
+                <span>Оптимизация загрузки</span>
+              </label>
+              <span className="text-xs opacity-70 mt-1">
+                Исключает медленные атрибуты (visible, accessible)
+              </span>
+            </div>
+
             <button
               onClick={fetchSessions}
               disabled={isLoading}
@@ -466,7 +482,7 @@ export default function App() {
             >
               {isLoading ? 'Загрузка...' : 'Обновить список'}
             </button>
-            
+
             <button
               onClick={handleConnectToSession}
               disabled={!selectedSession || isLoading}
@@ -474,7 +490,7 @@ export default function App() {
             >
               {isLoading ? 'Подключение...' : 'Подключиться'}
             </button>
-            
+
             {selectedSession && (
               <>
                 <button
@@ -484,7 +500,7 @@ export default function App() {
                 >
                   {isLoading ? 'Обновление...' : 'Обновить экран'}
                 </button>
-                
+
                 <button
                   onClick={handleRefreshScreenshot}
                   disabled={isLoading}
@@ -495,13 +511,13 @@ export default function App() {
               </>
             )}
           </div>
-          
+
           {error && (
             <div className="mt-4 p-3 bg-red-500/20 border border-red-400/30 text-red-100 rounded-lg text-sm">
               {error}
             </div>
           )}
-          
+
           {sessions.length === 0 && !isLoading && !error && (
             <div className="mt-4 p-3 bg-yellow-500/20 border border-yellow-400/30 text-yellow-100 rounded-lg text-sm">
               Нет активных сессий. Запустите тест или приложение через Appium.
@@ -523,11 +539,11 @@ export default function App() {
               )}
             </h1>
             <div className="relative">
-              <canvas 
-                ref={canvasRef} 
-                width={402} 
-                height={874} 
-                className="border border-gray-300 rounded-lg shadow bg-gray-50 cursor-pointer" 
+              <canvas
+                ref={canvasRef}
+                width={402}
+                height={874}
+                className="border border-gray-300 rounded-lg shadow bg-gray-50 cursor-pointer"
                 style={{ width: '402px', height: '874px' }}
                 onClick={handleCanvasClick}
               />
@@ -548,7 +564,7 @@ export default function App() {
               )}
             </div>
           </div>
-          
+
           {/* Element Tree Panel */}
           <div className="flex-1 min-w-0">
             <div className="bg-white border border-gray-200 rounded-lg shadow max-h-[874px] overflow-hidden flex flex-col">
@@ -567,11 +583,11 @@ export default function App() {
                   )}
                 </h2>
               </div>
-              
+
               <div className="flex-1 overflow-y-auto p-3 element-tree">
                 {rootBox ? (
-                  <TreeNode 
-                    node={rootBox} 
+                  <TreeNode
+                    node={rootBox}
                     onElementClick={handleElementClick}
                     highlightedElement={highlightedElement}
                   />
@@ -596,12 +612,12 @@ export default function App() {
 
           {/* Element Properties Panel */}
           <div className="flex-1 min-w-0 max-w-md">
-            <ElementProperties 
+            <ElementProperties
               element={highlightedElement}
               platform={deviceInfo?.session?.capabilities?.platformName || 'iOS'}
             />
           </div>
-      </div>
+        </div>
       </div>
     </div>
   );

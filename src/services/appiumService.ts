@@ -52,11 +52,16 @@ class AppiumService {
   }
 
   /**
-   * Установить максимальную глубину снапшота
+   * Установить максимальную глубину снапшота и оптимизации
    */
   async setSnapshotMaxDepth(sessionId: string, depth: number): Promise<void> {
     try {
-      await this.setSessionSettings(sessionId, { snapshotMaxDepth: depth, customSnapshotTimeout: 600, snapshotTimeout: 600 } as any);
+      await this.setSessionSettings(sessionId, {
+        snapshotMaxDepth: depth,
+        customSnapshotTimeout: 600,
+        snapshotTimeout: 600,
+        pageSourceExcludedAttributes: 'visible,accessible'  // Исключаем медленные атрибуты
+      } as any);
     } catch (error) {
       alert(error);
       throw error;
@@ -64,7 +69,7 @@ class AppiumService {
   }
 
   /**
-   * Получить XML источник страницы
+   * Получить XML источник страницы (оптимизировано)
    */
   async getPageSource(sessionId: string): Promise<string> {
     const response = await fetch(`${this.baseUrl}/session/${sessionId}/source`, {
@@ -80,6 +85,37 @@ class AppiumService {
 
     const data: PageSourceResponse = await response.json();
     return data.value;
+  }
+
+  /**
+   * Получить XML источник страницы (оптимизировано с исключением атрибутов)
+   */
+  async getPageSourceOptimized(sessionId: string, excludeAttributes: string[] = ['visible', 'accessible']): Promise<string> {
+    try {
+      // Пробуем использовать mobile:source для XCUITest драйвера (быстрее)
+      const response = await fetch(`${this.baseUrl}/session/${sessionId}/execute`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          script: 'mobile: source',
+          args: [{
+            excludedAttributes: excludeAttributes
+          }]
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.value;
+      }
+    } catch (error) {
+      console.log('mobile:source не поддерживается, используем стандартный метод:', error);
+    }
+
+    // Fallback на стандартный метод
+    return await this.getPageSource(sessionId);
   }
 
   /**
@@ -102,31 +138,55 @@ class AppiumService {
   }
 
   /**
-   * Получить полный снапшот с настройкой глубины
+   * Получить полный снапшот с настройкой глубины (оптимизировано)
    */
   async getPageSourceWithDepth(sessionId: string, maxDepth: number): Promise<string> {
-    // Сначала устанавливаем глубину
+    // Сначала устанавливаем глубину и исключения атрибутов
     await this.setSnapshotMaxDepth(sessionId, maxDepth);
 
-    // Затем получаем источник
-    return await this.getPageSource(sessionId);
+    // Затем получаем источник с оптимизацией
+    return await this.getPageSourceOptimized(sessionId);
   }
 
   /**
-   * Получить скриншот и XML источник одновременно
+   * Получить скриншот и XML источник одновременно (оптимизировано)
    */
   async getScreenshotAndPageSource(sessionId: string, maxDepth: number): Promise<{
     screenshot: string;
     pageSource: string;
   }> {
     console.log('Getting screenshot and page source with depth:', maxDepth);
-    // Сначала устанавливаем глубину
+    // Сначала устанавливаем глубину и исключения атрибутов
     await this.setSnapshotMaxDepth(sessionId, maxDepth);
 
-    // Затем получаем скриншот и источник параллельно
+    // Затем получаем скриншот и источник параллельно (используем оптимизированный метод)
     const [screenshot, pageSource] = await Promise.all([
       this.getScreenshot(sessionId),
-      this.getPageSource(sessionId)
+      this.getPageSourceOptimized(sessionId)  // Используем оптимизированный метод
+    ]);
+
+    return { screenshot, pageSource };
+  }
+
+  /**
+   * Получить скриншот и XML источник одновременно (без оптимизаций)
+   */
+  async getScreenshotAndPageSourceUnoptimized(sessionId: string, maxDepth: number): Promise<{
+    screenshot: string;
+    pageSource: string;
+  }> {
+    console.log('Getting screenshot and page source (unoptimized) with depth:', maxDepth);
+    // Устанавливаем только глубину, без исключения атрибутов
+    await this.setSessionSettings(sessionId, {
+      snapshotMaxDepth: maxDepth,
+      customSnapshotTimeout: 600,
+      snapshotTimeout: 600
+    } as any);
+
+    // Затем получаем скриншот и источник параллельно (стандартный метод)
+    const [screenshot, pageSource] = await Promise.all([
+      this.getScreenshot(sessionId),
+      this.getPageSource(sessionId)  // Используем стандартный метод
     ]);
 
     return { screenshot, pageSource };

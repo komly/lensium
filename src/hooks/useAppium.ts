@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { appiumService } from '../services/appiumService';
-import { parsePageSource } from '../utils/xmlParser';
 import type { AppiumSession, ElementBox } from '../types/appium';
+import { parsePageSource } from '../utils/xmlParser';
 
 export function useAppium() {
   const [sessions, setSessions] = useState<AppiumSession[]>([]);
@@ -16,10 +16,10 @@ export function useAppium() {
     try {
       setIsLoading(true);
       setError('');
-      
+
       const sessionsData = await appiumService.getSessions();
       setSessions(sessionsData || []);
-      
+
     } catch (err) {
       console.error('Error fetching sessions:', err);
       setError('Не удалось получить список сессий. Проверьте что Appium сервер запущен на localhost:4723');
@@ -28,7 +28,7 @@ export function useAppium() {
     }
   }, []);
 
-  const connectToSession = useCallback(async (sessionId: string, maxDepth: number = 20) => {
+  const connectToSession = useCallback(async (sessionId: string, maxDepth: number = 20, optimize: boolean = true) => {
     try {
       setIsLoading(true);
       setError('');
@@ -40,7 +40,9 @@ export function useAppium() {
       console.log('Device info:', deviceInfoData);
 
       // Получаем скриншот и XML источник одновременно
-      const { screenshot: screenshotData, pageSource: xmlSource } = await appiumService.getScreenshotAndPageSource(sessionId, maxDepth);
+      const { screenshot: screenshotData, pageSource: xmlSource } = optimize
+        ? await appiumService.getScreenshotAndPageSource(sessionId, maxDepth)
+        : await appiumService.getScreenshotAndPageSourceUnoptimized(sessionId, maxDepth);
 
       const tree = parsePageSource(xmlSource);
 
@@ -56,7 +58,7 @@ export function useAppium() {
     }
   }, []);
 
-  const refreshPageSource = useCallback(async (maxDepth: number = 20) => {
+  const refreshPageSource = useCallback(async (maxDepth: number = 20, optimize: boolean = true) => {
     if (!selectedSession) return;
 
     try {
@@ -69,10 +71,12 @@ export function useAppium() {
 
 
       // Получаем скриншот и XML источник одновременно
-      const { screenshot: screenshotData, pageSource: xmlSource } = await appiumService.getScreenshotAndPageSource(selectedSession, maxDepth);
+      const { screenshot: screenshotData, pageSource: xmlSource } = optimize
+        ? await appiumService.getScreenshotAndPageSource(selectedSession, maxDepth)
+        : await appiumService.getScreenshotAndPageSourceUnoptimized(selectedSession, maxDepth);
 
       const tree = parsePageSource(xmlSource);
-      
+
       setRootBox(tree);
       setScreenshot(screenshotData);
 

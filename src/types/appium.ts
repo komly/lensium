@@ -21,6 +21,14 @@ export interface AppiumSession {
 
 export interface AppiumSettings {
   snapshotMaxDepth: number;
+  pageSourceExcludedAttributes?: string;
+  customSnapshotTimeout?: number;
+  snapshotTimeout?: number;
+}
+
+export interface PageSourceOptimization {
+  excludedAttributes: string[];
+  useMobileSource: boolean;
 }
 
 export interface SessionsResponse {
