@@ -26,8 +26,8 @@
 ## 📦 Артефакты сборки
 
 ### macOS
-- `Appium Inspector-{version}.dmg` - Intel Mac установщик
-- `Appium Inspector-{version}-arm64.dmg` - Apple Silicon установщик
+- `Lensium-{version}.dmg` - Intel Mac установщик
+- `Lensium-{version}-arm64.dmg` - Apple Silicon установщик
 
 ## 🔄 Процесс релиза
 

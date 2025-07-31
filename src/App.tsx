@@ -422,7 +422,7 @@ export default function App() {
         {/* Session Selection Panel */}
         <div className="session-panel rounded-lg p-4 text-white shadow-lg">
           <h2 className="text-lg font-semibold mb-3">
-            Подключение к Appium сессии
+            Подключение к сессии
           </h2>
 
           <div className="flex flex-wrap gap-4 items-end">
@@ -520,7 +520,7 @@ export default function App() {
 
           {sessions.length === 0 && !isLoading && !error && (
             <div className="mt-4 p-3 bg-yellow-500/20 border border-yellow-400/30 text-yellow-100 rounded-lg text-sm">
-              Нет активных сессий. Запустите тест или приложение через Appium.
+              Нет активных сессий. Запустите тест или приложение через Appium сервер.
             </div>
           )}
         </div>
@@ -530,7 +530,7 @@ export default function App() {
           {/* Canvas Panel */}
           <div className="flex-shrink-0">
             <h1 className="text-xl font-bold mb-3 text-gray-800 flex items-center gap-2">
-              Appium Inspector
+              Lensium
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
               {screenshotImage && (
                 <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">

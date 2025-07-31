@@ -1,4 +1,4 @@
-# Appium Inspector
+# Lensium
 
 Современная альтернатива официальному Appium Inspector с улучшенным интерфейсом и дополнительными возможностями.
 
@@ -24,15 +24,15 @@
 ### Скачать готовую сборку
 1. Перейдите в [Releases](../../releases)
 2. Скачайте `.dmg` файл для вашей архитектуры:
-   - Intel Mac: `Appium Inspector-{version}.dmg`
-   - Apple Silicon: `Appium Inspector-{version}-arm64.dmg`
+   - Intel Mac: `Lensium-{version}.dmg`
+   - Apple Silicon: `Lensium-{version}-arm64.dmg`
 3. Установите перетаскиванием в Applications
 
 ### Сборка из исходников
 ```bash
 # Клонируйте репозиторий
 git clone <repository-url>
-cd appium
+cd lensium
 
 # Установите зависимости  
 pnpm install
@@ -100,8 +100,9 @@ git push origin main --tags
 
 📖 **Подробная документация**: [CI/CD Guide](docs/CI-CD.md)
 
-## 🏗️ Архитектура
+## ��️ Архитектура
 
+- **Название**: Lensium - современная альтернатива Appium Inspector
 - **Frontend**: React 18 + TypeScript + Tailwind CSS v4
 - **Desktop**: Electron 37 + electron-builder
 - **Build**: Vite 5 + TypeScript

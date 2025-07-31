@@ -39,7 +39,7 @@ jobs:
       - name: Upload binaries
         uses: actions/upload-artifact@v4
         with:
-          name: appium-inspector-binaries
+          name: lensium-binaries
           path: release/*
 
       - name: Create GitHub Release
