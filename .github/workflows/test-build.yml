@@ -1,0 +1,45 @@
+name: Test Build
+
+on:
+  workflow_dispatch: # Ручной запуск
+  push:
+    branches: [ develop, feature/* ]
+
+jobs:
+  test-build:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 8
+        
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+      
+    - name: Lint code
+      run: pnpm lint
+      continue-on-error: true
+      
+    - name: Build web application
+      run: pnpm build
+      
+    - name: Test Electron build (macOS only)
+      run: pnpm electron:build-mac
+      
+    - name: Upload test artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-build-macos
+        path: |
+          release/*.dmg
+        retention-days: 7 

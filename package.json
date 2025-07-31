@@ -16,10 +16,8 @@
     "electron": "cross-env NODE_ENV=development electron .",
     "electron:pack": "electron-builder",
     "electron:dev": "concurrently \"pnpm dev\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development nodemon\"",
-    "electron:build": "pnpm build && electron-builder",
-    "electron:build-mac": "pnpm build && electron-builder --mac",
-    "electron:build-win": "pnpm build && electron-builder --win",
-    "electron:build-linux": "pnpm build && electron-builder --linux"
+    "electron:build": "pnpm build && electron-builder --mac",
+    "test-ci": "chmod +x scripts/test-ci.sh && ./scripts/test-ci.sh"
   },
   "dependencies": {
     "fast-xml-parser": "^4.5.0",
@@ -81,35 +79,6 @@
         }
       ],
       "icon": "public/icon.icns"
-    },
-    "win": {
-      "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        }
-      ],
-      "icon": "public/icon.ico"
-    },
-    "linux": {
-      "target": [
-        {
-          "target": "AppImage",
-          "arch": [
-            "x64"
-          ]
-        }
-      ],
-      "category": "Development",
-      "icon": "public/icon.png"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
     }
   }
 }

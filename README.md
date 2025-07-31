@@ -19,6 +19,28 @@
 - **macOS** (Intel или Apple Silicon)
 - Активная Appium сессия для инспекции
 
+## 📦 Установка
+
+### Скачать готовую сборку
+1. Перейдите в [Releases](../../releases)
+2. Скачайте `.dmg` файл для вашей архитектуры:
+   - Intel Mac: `Appium Inspector-{version}.dmg`
+   - Apple Silicon: `Appium Inspector-{version}-arm64.dmg`
+3. Установите перетаскиванием в Applications
+
+### Сборка из исходников
+```bash
+# Клонируйте репозиторий
+git clone <repository-url>
+cd appium
+
+# Установите зависимости  
+pnpm install
+
+# Соберите приложение
+pnpm electron:build
+```
+
 ## 🔧 API Подключение
 
 ### Development режим
@@ -54,15 +76,54 @@ pnpm electron:dev
 pnpm electron:build
 ```
 
+## 🔄 CI/CD Pipeline
+
+### 🚀 Автоматическая сборка
+GitHub Actions автоматически собирает приложение для **macOS**:
+- **Intel Mac** (x64)
+- **Apple Silicon** (ARM64)
+
+### 📋 Доступные Workflows
+- **Build**: Сборка на каждый push/PR
+- **Release**: Автоматический релиз по тегам
+
+### 🏷️ Создание релиза
+```bash
+# Обновите версию
+npm version patch
+
+# Отправьте тег 
+git push origin main --tags
+
+# GitHub Actions автоматически создаст релиз!
+```
+
+📖 **Подробная документация**: [CI/CD Guide](docs/CI-CD.md)
+
 ## 🏗️ Архитектура
 
 - **Frontend**: React 18 + TypeScript + Tailwind CSS v4
 - **Desktop**: Electron 37 + electron-builder
 - **Build**: Vite 5 + TypeScript
 - **API**: Прямое подключение к Appium REST API
+- **CI/CD**: GitHub Actions + macOS builds
 
 ## 📱 Поддерживаемые платформы
 
 - **iOS**: XCUITest элементы
 - **Android**: UIAutomator2 элементы  
 - **Универсальные**: Accessibility ID, XPath селекторы
+
+## 🤝 Вклад в проект
+
+1. Fork репозитория
+2. Создайте feature ветку (`git checkout -b feature/amazing-feature`)
+3. Commit изменения (`git commit -m 'Add amazing feature'`)
+4. Push в ветку (`git push origin feature/amazing-feature`)
+5. Откройте Pull Request
+
+GitHub Actions автоматически проверит вашу сборку!
+
+## 📄 Лицензия
+
+MIT License - см. [LICENSE](LICENSE) файл.
