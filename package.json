@@ -1,7 +1,7 @@
 {
   "name": "appium-inspector",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "description": "Modern desktop application for inspecting mobile app UI elements",
   "author": "Your Name",
