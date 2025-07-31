@@ -273,7 +273,7 @@ export default function App() {
               
               // Add border to text background
               ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)';
-              ctx.lineWidth = 1;
+    ctx.lineWidth = 1;
               ctx.setLineDash([]);
               ctx.strokeRect(textX - 1, textY - 12, textWidth, textHeight);
               
@@ -290,7 +290,7 @@ export default function App() {
       // Fallback: draw elements without screenshot
       const allBoxes = flatten(rootBox);
       
-      for (const box of allBoxes) {
+    for (const box of allBoxes) {
         if (box.width > 0 && box.height > 0) {
           // Highlight selected element
           if (highlightedElement && box === highlightedElement) {
@@ -303,7 +303,7 @@ export default function App() {
             ctx.setLineDash([]);
           }
           
-          ctx.strokeRect(box.x, box.y, box.width, box.height);
+      ctx.strokeRect(box.x, box.y, box.width, box.height);
           
           // Draw element name if space allows
           if (box.name && box.width > 30 && box.height > 20) {
@@ -601,7 +601,7 @@ export default function App() {
               platform={deviceInfo?.session?.capabilities?.platformName || 'iOS'}
             />
           </div>
-        </div>
+      </div>
       </div>
     </div>
   );
