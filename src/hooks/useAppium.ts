@@ -67,6 +67,7 @@ export function useAppium() {
       const deviceInfoData = await appiumService.getDeviceInfo(selectedSession);
       setDeviceInfo(deviceInfoData);
 
+
       // Получаем скриншот и XML источник одновременно
       const { screenshot: screenshotData, pageSource: xmlSource } = await appiumService.getScreenshotAndPageSource(selectedSession, maxDepth);
 

@@ -55,7 +55,12 @@ class AppiumService {
    * Установить максимальную глубину снапшота
    */
   async setSnapshotMaxDepth(sessionId: string, depth: number): Promise<void> {
-    await this.setSessionSettings(sessionId, { snapshotMaxDepth: depth, customSnapshotTimeout: 100, snapshotTimeout: 100 } as any);
+    try {
+      await this.setSessionSettings(sessionId, { snapshotMaxDepth: depth, customSnapshotTimeout: 100, snapshotTimeout: 100 } as any);
+    } catch (error) {
+      alert(error);
+      throw error;
+    }
   }
 
   /**
@@ -114,6 +119,7 @@ class AppiumService {
     screenshot: string;
     pageSource: string;
   }> {
+    console.log('Getting screenshot and page source with depth:', maxDepth);
     // Сначала устанавливаем глубину
     await this.setSnapshotMaxDepth(sessionId, maxDepth);
     
