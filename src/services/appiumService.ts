@@ -1,4 +1,4 @@
-import type { AppiumSession, AppiumSettings, SessionsResponse, PageSourceResponse } from '../types/appium';
+import type { AppiumSession, AppiumSettings, PageSourceResponse, SessionsResponse } from '../types/appium';
 
 class AppiumService {
   private baseUrl: string;
@@ -7,7 +7,7 @@ class AppiumService {
     // В Electron приложении используем прямой адрес, в dev режиме - прокси
     const isElectron = typeof window !== 'undefined' && 'electronAPI' in window;
     const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost' && window.location.port === '5173';
-    
+
     if (isElectron) {
       this.baseUrl = 'http://localhost:4723';
     } else if (isDev) {
@@ -16,7 +16,7 @@ class AppiumService {
       // Fallback для других случаев
       this.baseUrl = 'http://localhost:4723';
     }
-    
+
     console.log('AppiumService initialized with baseUrl:', this.baseUrl);
   }
 
@@ -25,11 +25,11 @@ class AppiumService {
    */
   async getSessions(): Promise<AppiumSession[]> {
     const response = await fetch(`${this.baseUrl}/sessions`);
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data: SessionsResponse = await response.json();
     return data.value || [];
   }
@@ -45,7 +45,7 @@ class AppiumService {
       },
       body: JSON.stringify({ settings })
     });
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -56,7 +56,7 @@ class AppiumService {
    */
   async setSnapshotMaxDepth(sessionId: string, depth: number): Promise<void> {
     try {
-      await this.setSessionSettings(sessionId, { snapshotMaxDepth: depth, customSnapshotTimeout: 100, snapshotTimeout: 100 } as any);
+      await this.setSessionSettings(sessionId, { snapshotMaxDepth: depth, customSnapshotTimeout: 600, snapshotTimeout: 600 } as any);
     } catch (error) {
       alert(error);
       throw error;
@@ -73,11 +73,11 @@ class AppiumService {
         'Content-Type': 'application/json',
       }
     });
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data: PageSourceResponse = await response.json();
     return data.value;
   }
@@ -92,11 +92,11 @@ class AppiumService {
         'Content-Type': 'application/json',
       }
     });
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
     return data.value; // base64 string
   }
@@ -107,7 +107,7 @@ class AppiumService {
   async getPageSourceWithDepth(sessionId: string, maxDepth: number): Promise<string> {
     // Сначала устанавливаем глубину
     await this.setSnapshotMaxDepth(sessionId, maxDepth);
-    
+
     // Затем получаем источник
     return await this.getPageSource(sessionId);
   }
@@ -122,13 +122,13 @@ class AppiumService {
     console.log('Getting screenshot and page source with depth:', maxDepth);
     // Сначала устанавливаем глубину
     await this.setSnapshotMaxDepth(sessionId, maxDepth);
-    
+
     // Затем получаем скриншот и источник параллельно
     const [screenshot, pageSource] = await Promise.all([
       this.getScreenshot(sessionId),
       this.getPageSource(sessionId)
     ]);
-    
+
     return { screenshot, pageSource };
   }
 
@@ -206,7 +206,7 @@ class AppiumService {
   }> {
     try {
       console.log('=== TRYING TO GET DEVICE INFO ===');
-      
+
       // Пробуем все возможные методы
       const windowSizePromise = this.getWindowSize(sessionId)
         .then(result => {
@@ -281,7 +281,7 @@ class AppiumService {
         'Content-Type': 'application/json',
       }
     });
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -292,11 +292,11 @@ class AppiumService {
    */
   async getSession(sessionId: string): Promise<AppiumSession> {
     const response = await fetch(`${this.baseUrl}/session/${sessionId}`);
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
     return {
       id: sessionId,
